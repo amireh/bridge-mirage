@@ -5,8 +5,15 @@ const { Route, HashLocation } = ReactRouter;
 
 let router;
 
-exports.start = function(context, onError) {
+module.exports = function(context, onError) {
   const params = context.params || {};
+
+  if (router) {
+    ReactDOM.unmountComponentAtNode(context.rootElement);
+
+    router.stop();
+    router = null;
+  }
 
   if (typeof params.path !== 'string') {
     onError("You must specify the route path for this handler!");
@@ -39,14 +46,5 @@ exports.start = function(context, onError) {
   router.run((Handler, state) => {
     ReactDOM.render(<Handler {...state} />, context.rootElement);
   });
-};
-
-exports.stop = function(context) {
-  if (router) {
-    ReactDOM.unmountComponentAtNode(context.rootElement);
-
-    router.stop();
-    router = null;
-  }
 };
 

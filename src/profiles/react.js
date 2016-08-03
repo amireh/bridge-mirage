@@ -1,7 +1,9 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 
-exports.start = function(context, onError) {
+module.exports = function(context, onError) {
+  ReactDOM.unmountComponentAtNode(context.rootElement);
+
   if (!context.subject) {
     onError("No subject? No play!");
     return;
@@ -9,7 +11,3 @@ exports.start = function(context, onError) {
 
   ReactDOM.render(<context.subject {...context.params} />, context.rootElement);
 }
-
-exports.stop = function(context) {
-  ReactDOM.unmountComponentAtNode(context.rootElement);
-};

@@ -27,6 +27,7 @@ const config = {
 
   resolve: {
     root: [
+      path.resolve(__dirname, 'bandaids'),
       path.join(GET_SMART, 'jsapp/shimmed_modules'),
       path.join(GET_SMART, 'jsapp/shared'),
       path.join(GET_SMART, 'packages'),
@@ -39,6 +40,9 @@ const config = {
     loaderPostfixes: [ '' ],
     postfixes: [ '' ],
     alias: {
+      // TODO: remove when merging into get_smart
+      'vendor/i18n$': path.join(GET_SMART, 'jsapp/vendor/i18n.js'),
+      'vendor/i18n_js_extension$': path.join(GET_SMART, 'jsapp/vendor/i18n_js_extension.js'),
       'webpack-hot-middleware/client$': path.resolve(__dirname, 'node_modules/webpack-hot-middleware/client.js'),
     },
   },
@@ -135,7 +139,9 @@ const config = {
 
 // DLL shizzle. Read more about this in /webpack/dlls/README.md
 if (process.env.WEBPACK_DLLS === '1') {
-  var manifest = loadDLLManifest(path.join(GET_SMART, 'webpack/dlls/manifests/vendor.json'));
+  let manifest;
+
+  manifest = loadDLLManifest(path.join(GET_SMART, 'webpack/dlls/manifests/vendor.json'));
   if (manifest) {
     console.warn('Webpack: will be using the vendor DLL.');
 

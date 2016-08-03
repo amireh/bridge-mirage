@@ -1,5 +1,5 @@
 if (module.hot) {
-  module.hot.decline();
+  module.hot.decline(); // need a full reload, can't reload Ember!
 }
 
 require('../../../test/features_setup');

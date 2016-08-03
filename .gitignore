@@ -1,6 +1,9 @@
 !.gitkeep
 /node_modules
+/config.js
 /.happypack
+/tmp/*
+!/tmp/.gitkeep
 /runner/*
 !/runner/.gitkeep
 !/runner/seeds

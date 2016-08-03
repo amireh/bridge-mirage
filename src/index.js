@@ -18,15 +18,8 @@ const hasValidContext = profile && typeof context.subject === 'function';
 
 if (module.hot) {
   module.hot.accept();
-  module.hot.dispose(function() {
-    if (hasValidContext) {
-      guard(function() { profile.stop(context); });
-    }
-  });
-
   module.hot.accept([ './profiles/react', './profiles/react-router' ], function() {
     if (hasValidContext) {
-      guard(function() { profile.stop(context); });
       guard(function() { startProfile(); });
     }
   });
@@ -57,7 +50,7 @@ boot(function() {
 });
 
 function startProfile() {
-  profile.start(context, function(error) {
+  profile(context, function(error) {
     errorMessages.push(error);
     renderErrors();
   });
@@ -102,7 +95,7 @@ function guard(fn) {
   }
   catch(error) {
     errorMessages.push({
-      message: "Runtime error:",
+      message: "Runtime error! /o\\",
       stack: error.stack
     });
 

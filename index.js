@@ -1,38 +1,22 @@
 #!/usr/bin/env node
 
 const path = require('path');
-const fs = require('fs');
 const connect = require('connect');
 const proxy = require('proxy-middleware');
 const url = require('url');
 const webpack = require('webpack');
 const bodyParser = require('body-parser');
 const api = require('./server/api');
-const generateRunner = require('./server/generateRunner');
-const webpackConfig = Object.assign({}, require('./webpack.config'));
-const app = connect();
 const contentBase = path.resolve(__dirname);
-const bridgeBase = path.resolve(__dirname, '..', '..');
-const PORT = process.env.PORT || 9999;
+const bridgeBase = getSetting('BRIDGE_ROOT', require('./server/resolveBridgeRoot')());
+const bridgeHost = getSetting('BRIDGE_HOST', 'http://bridgelearning.dev:3000');
+const port = getSetting('PORT', 9999);
+const webpackConfig = loadAndMonkeyPatchWebpackConfig(port);
 
-webpackConfig.entry.bundle = [
-  `webpack-hot-middleware/client?path=http://localhost:${PORT}/__webpack_hmr`
-].concat( webpackConfig.entry.bundle );
-
-webpackConfig.output.publicPath = '/build/';
-webpackConfig.plugins = (webpackConfig.plugins || []).concat([
-  new webpack.optimize.OccurenceOrderPlugin(),
-  new webpack.HotModuleReplacementPlugin(),
-  new webpack.NoErrorsPlugin()
-]);
-
+const app = connect();
 const compiler = webpack(webpackConfig);
 
-app.use('/api', proxy(url.parse('http://bridge.localhost.com:3000/api')));
-// app.use('/fonts', proxy(url.parse('http://bridge.localhost.com:3000/fonts')));
-// app.use('/images', proxy(url.parse('http://bridge.localhost.com:3000/images')));
-// app.use('/locales', proxy(url.parse('http://bridge.localhost.com:3000/locales')));
-// app.use('/fakes3-uploads', proxy(url.parse('http://bridge.localhost.com:3000/fakes3-uploads')));
+app.use('/api', proxy(url.parse(`${bridgeHost}/api`)));
 
 app.use(bodyParser.json());
 app.use(require('webpack-dev-middleware')(compiler, {
@@ -40,36 +24,36 @@ app.use(require('webpack-dev-middleware')(compiler, {
   publicPath: webpackConfig.output.publicPath,
   hot: false,
   quiet: false,
-  noInfo: false,
+  noInfo: process.env.PROFILE !== '1',
   lazy: false,
   inline: false,
-  profile: true,
+  profile: process.env.PROFILE === '1',
+  historyApiFallback: false,
   watchOptions: {
     aggregateTimeout: 300,
   },
-  stats: process.env.PROFILE === '1' ? {
+
+  stats: {
     colors: true,
     hash: true,
     version: true,
-    timings: true,
-    assets: true,
+    timings: process.env.PROFILE === '1',
+    assets: process.env.PROFILE === '1',
     chunks: true,
-    modules: true,
-    reasons: true,
-    children: true,
+    modules: process.env.PROFILE === '1',
+    reasons: process.env.PROFILE === '1',
+    children: process.env.PROFILE === '1',
     source: false,
     errors: true,
     errorDetails: true,
     warnings: true,
-    publicPath: true
-  } : { colors: true, version: true, hash: true, modules: false },
-  historyApiFallback: false,
+    publicPath: process.env.PROFILE === '1',
+  },
 }));
-
 app.use(require('webpack-hot-middleware')(compiler));
 
 // mirage API endpoints:
-api(app, { bridgeBase: path.resolve(__dirname, '../../') });
+api(app, { bridgeBase: bridgeBase });
 
 // serve Mirage index.html:
 app.use(require('serve-static')(contentBase));
@@ -78,4 +62,56 @@ app.use(require('serve-static')(contentBase));
 // locales/, etc.:
 app.use(require('serve-static')(path.join(bridgeBase, 'public')));
 
-app.listen(PORT);
+console.log(Array(80).join('='));
+console.log('Mirage [Bridge]');
+console.log(Array(80).join('*'));
+console.log('Mirage: Running initial Webpack build, hold your horses...');
+
+compiler.plugin('done', fnOnce(function() {
+  console.log('Mirage: OK, all set for play.');
+}));
+
+app.listen(port, function() {
+  console.log('Mirage: HTTP server listening at %d', port);
+});
+
+function fnOnce(fn) {
+  let called = false;
+
+  return function() {
+    if (!called) {
+      called = true;
+      fn.apply(null, arguments);
+    }
+  }
+}
+
+function getSetting(key, defaultValue) {
+  let userConfig;
+
+  try {
+    userConfig = require('./config');
+  }
+  catch(e) {
+    userConfig = {};
+  }
+
+  return process.env[key] || userConfig[key] || defaultValue;
+}
+
+function loadAndMonkeyPatchWebpackConfig(port) {
+  const config = Object.assign({}, require('./webpack.config'));
+
+  config.entry.bundle = [
+    `webpack-hot-middleware/client?path=http://localhost:${port}/__webpack_hmr`
+  ].concat( config.entry.bundle );
+
+  config.output.publicPath = '/build/';
+  config.plugins = (config.plugins || []).concat([
+    new webpack.optimize.OccurenceOrderPlugin(),
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.NoErrorsPlugin()
+  ]);
+
+  return config;
+}
