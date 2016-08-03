@@ -8,20 +8,31 @@ const webpack = require('webpack');
 const bodyParser = require('body-parser');
 const api = require('./server/api');
 const contentBase = path.resolve(__dirname);
-const bridgeBase = getSetting('BRIDGE_ROOT', require('./server/resolveBridgeRoot')());
-const bridgeHost = getSetting('BRIDGE_HOST', 'http://bridgelearning.dev:3000');
+
 const port = getSetting('PORT', 9999);
-const webpackConfig = loadAndMonkeyPatchWebpackConfig(port);
+const bridgeHost = getSetting('BRIDGE_HOST', 'http://bridgelearning.dev:3000');
+const bridgeBase = getSetting('BRIDGE_ROOT', function() {
+  return require('./server/resolveBridgeRoot')();
+});
 
 const app = connect();
-const compiler = webpack(webpackConfig);
+const compiler = webpack(loadAndMonkeyPatchWebpackConfig({
+  port: port,
+  bridgeBase: bridgeBase
+}));
 
+// Forward all /api requests to Bridge Rails:
 app.use('/api', proxy(url.parse(`${bridgeHost}/api`)));
 
+// We'll need body parsing for the activation API, see server/api.js
 app.use(bodyParser.json());
+
+// Mirage API endpoints:
+api(app, { bridgeBase: bridgeBase });
+
 app.use(require('webpack-dev-middleware')(compiler, {
   contentBase: contentBase,
-  publicPath: webpackConfig.output.publicPath,
+  publicPath: compiler.options.output.publicPath,
   hot: false,
   quiet: false,
   noInfo: process.env.PROFILE !== '1',
@@ -50,10 +61,8 @@ app.use(require('webpack-dev-middleware')(compiler, {
     publicPath: process.env.PROFILE === '1',
   },
 }));
-app.use(require('webpack-hot-middleware')(compiler));
 
-// mirage API endpoints:
-api(app, { bridgeBase: bridgeBase });
+app.use(require('webpack-hot-middleware')(compiler));
 
 // serve Mirage index.html:
 app.use(require('serve-static')(contentBase));
@@ -64,7 +73,7 @@ app.use(require('serve-static')(path.join(bridgeBase, 'public')));
 
 console.log(Array(80).join('='));
 console.log('Mirage [Bridge]');
-console.log(Array(80).join('*'));
+console.log(Array(80).join('-'));
 console.log('Mirage: Running initial Webpack build, hold your horses...');
 
 compiler.plugin('done', fnOnce(function() {
@@ -96,21 +105,45 @@ function getSetting(key, defaultValue) {
     userConfig = {};
   }
 
-  return process.env[key] || userConfig[key] || defaultValue;
+  return process.env[key] || userConfig[key] || lazy(defaultValue);
+
+  function lazy(x) {
+    if (typeof x === 'function') {
+      return x();
+    }
+    else {
+      return x;
+    }
+  }
 }
 
-function loadAndMonkeyPatchWebpackConfig(port) {
-  const config = Object.assign({}, require('./webpack.config'));
+function loadAndMonkeyPatchWebpackConfig(settings) {
+  const config = require('./webpack.config')({
+    bridgeBase: settings.bridgeBase,
+    happy: getSetting('HAPPY'),
+    withDLLs: getSetting('WEBPACK_DLLS'),
+  });
+
+  const apiToken = getSetting('BRIDGE_API_TOKEN');
+
+  if (!apiToken || String(apiToken).length === 0) {
+    console.error("Mirage: BRIDGE_API_TOKEN must be configured!");
+
+    process.exit(1);
+  }
 
   config.entry.bundle = [
-    `webpack-hot-middleware/client?path=http://localhost:${port}/__webpack_hmr`
+    `webpack-hot-middleware/client?path=http://localhost:${settings.port}/__webpack_hmr`
   ].concat( config.entry.bundle );
 
   config.output.publicPath = '/build/';
   config.plugins = (config.plugins || []).concat([
+    new webpack.DefinePlugin({
+      'process.env.BRIDGE_API_TOKEN': JSON.stringify(apiToken)
+    }),
     new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoErrorsPlugin()
+    new webpack.NoErrorsPlugin(),
   ]);
 
   return config;

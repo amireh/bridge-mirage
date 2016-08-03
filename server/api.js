@@ -2,12 +2,13 @@ const glob = require('glob');
 const path = require('path');
 const generateRunner = require('./generateRunner');
 
-module.exports = function(app, config) {
-  const bridgeBase = config.bridgeBase;
+module.exports = function(app, settings) {
+  const bridgeBase = settings.bridgeBase;
 
   app.use('/mirage/ls', function(req, res, next) {
     if (req.method !== 'GET') {
-      return next();
+      next();
+      return;
     }
 
     var files = glob.sync(`{packages,jsapp}/**/*.js`, {

@@ -2,8 +2,8 @@ if (module.hot) {
   module.hot.decline(); // need a full reload, can't reload Ember!
 }
 
-require('../../../test/features_setup');
-require('../../../jsapp/config/initializers');
+require('test/features_setup');
+require('jsapp/config/initializers');
 
 const GetSmart = require('GetSmart');
 const GSHeartbeat = require('GetSmart/mixins/heartbeat');
@@ -25,7 +25,7 @@ GetSmart.initializer({
   initialize: function() {
     $.ajaxPrefilter(function(options) {
       options.headers = Object.assign({}, options.headers, {
-        "Authorization": 'Basic YjI0MDc3ZjAtZmRmOC00ODg0LTk4N2ItMTk4OThiN2JmYzMzOjY3ZTg5NDU2LWRhYTAtNGY0OS04NGI1LTFjNGExZWE3ODY3Ng=='
+        "Authorization": process.env.BRIDGE_API_TOKEN
       });
     });
   }

@@ -23,7 +23,9 @@ const onError = function(error) {
 if (module.hot) {
   module.hot.accept();
   module.hot.dispose(function() {
-    guard(function() { profile.stop(context); });
+    if (hasValidContext) {
+      guard(function() { profile.stop(context); });
+    }
   });
 
   module.hot.accept([ './profiles/react', './profiles/react-router' ], function() {
@@ -75,12 +77,19 @@ function loadContext() {
     return map;
   }, {});
 
-  if (userConfig['index'] && userConfig['index'].enabled !== false) {
-    return userConfig['index'];
+  const userContext = userConfig['index'];
+  const autoContext = autoConfig['context'];
+
+  if (userContext && userContext.enabled !== false) {
+    if (userContext.augment === true) {
+      return Object.assign({}, autoContext, removeNillies(userContext));
+    }
+    else if (!!userContext.profile) {
+      return userContext;
+    }
   }
-  else {
-    return autoConfig['context'];
-  }
+
+  return autoContext;
 }
 
 function decorateContext(context) {
@@ -104,4 +113,14 @@ function guard(fn) {
     console.warn("Profile error:");
     console.warn(error && error.stack || error);
   }
+}
+
+function removeNillies(object) {
+  return Object.keys(object).reduce(function(map, key) {
+    if (object[key] !== null && object[key] !== undefined) {
+      map[key] = object[key];
+    }
+
+    return map;
+  }, {});
 }

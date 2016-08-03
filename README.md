@@ -15,21 +15,37 @@ A "lite" Bridge client for faster front-end iterations.
 ### Advanced Usage (file-system based)
 
 The UI approach ends up generating a file refered to as the _context file_ 
-which Mirage ends up consuming. You may short-circuit that process and just
-write the file directly.
+which Mirage ends up consuming. You may also define your own context to gain
+finer control.
 
-You need to place this file under `runners/index.js` - changes to it will not
-be tracked in git.
+This file lives at `runner/index.js` and changes to it will not be tracked in 
+git, so feel free to modify as you wish.
 
 The structure of this file is as follows:
 
 ```javascript
+exports.enabled = Boolean;
+exports.augment = Boolean;
 exports.profile = String;
 exports.subject = Function;
-exports.params = Object?;
+exports.params = Object;
 ```
 
 Where:
+
+**`enabled`...**
+
+Can be turned off if you want the UI context to be used instead of this file.
+
+**`augment`...**
+
+Is a convenience flag which, when enabled, will cause the context you define
+in this file to "augment" the one generated through the UI (the former 
+overriding the latter.)
+
+This exists because I usually choose the file from the UI instead of copying
+it and doing the manual `require` labor, and then I just get to customize the
+`params` in the context file. With this setting, that use-case works.
 
 **`profile`...**
 
@@ -48,7 +64,7 @@ paths must be based off of that.
 
 **`params`...**
 
-Is stuff you can passed through to the profile for configuring your subject.
+Is stuff you can pass through to the profile for configuring your subject.
 For React profiles, this means the props that the component gets rendered with.
 
 Keep in mind that you have full flexibility in this script; it's just like 
@@ -89,10 +105,34 @@ exports.params = {
 };
 ```
 
+## Stylesheets
+
+Edit `runner/index.scss` and import all the stylesheets your subject requires.
+This file, like `runner/index.js` (and really, _everything_ inside that 
+directory) will not be tracked in git so you may modify as you need.
+
+Example:
+
+```scss
+// @file: mirage/runner/index.scss
+@import 'components/course_status';
+
+.my-subject {
+  // JSON variables are available too:
+  background: $dark-grey;
+}
+```
+
 ## Configuration
 
 You can expose any of these options to your environment or define them in a 
 file at `/config.js` (which is not tracked in the git repository.)
+
+#### `BRIDGE_API_TOKEN`: !String
+
+Your API token that Mirage will use to authenticate all requests.
+
+**THIS IS A REQUIRED PARAMETER!**
 
 #### `BRIDGE_HOST`: String
 
