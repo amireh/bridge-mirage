@@ -1,0 +1,11 @@
+.mirage-errors {
+  width: 50%;
+  margin: 0 auto -1em auto;
+
+  &__error {
+    background: lighten(orange, 35%);
+    display: block;
+    padding: 1em;
+    margin: 1em 0;
+  }
+}

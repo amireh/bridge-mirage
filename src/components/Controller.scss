@@ -1,0 +1,40 @@
+.mirage-application--hidden {
+  display: none;
+}
+
+.mirage-controller {
+  $width: 100%;
+
+  padding: 1em 0;
+  width: 50%;
+  min-width: 640px;
+  display: block;
+  margin: 0 auto;
+
+  fieldset {
+    border: none;
+    margin: 1em 0;
+    padding: 0;
+  }
+
+  input[type="text"], textarea {
+    padding: 0.5em;
+  }
+
+  select, textarea, input[type="text"] {
+    width: $width;
+    display: block;
+  }
+
+  textarea {
+    width: $width;
+    max-width: $width;
+    height: 240px;
+  }
+
+  &__actions {
+    button {
+      margin-right: 0.5em;
+    }
+  }
+}

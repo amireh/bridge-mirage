@@ -1,3 +1,8 @@
+!.gitkeep
 /node_modules
-/*.js
 /.happypack
+/runner/*
+!/runner/.gitkeep
+!/runner/seeds
+/runner/seeds/*
+!/runner/seeds/.gitkeep
