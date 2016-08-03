@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs');
 const api = require('../api');
+const resolveBridgeRoot = require('../resolveBridgeRoot');
 const assert = require('assert');
 const sinon = require('sinon');
 
@@ -22,7 +23,7 @@ describe('mirage API', function() {
     it('works', function(done) {
       const app = connect();
 
-      api(app, { bridgeBase: path.resolve(__dirname, '../../../../') });
+      api(app, { bridgeBase: resolveBridgeRoot() });
 
       supertest(app.listen())
         .get('/mirage/ls')
