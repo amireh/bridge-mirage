@@ -104,7 +104,9 @@ function guard(fn) {
   }
   catch(error) {
     errorMessages.push({
-      message: "Runtime error! /o\\",
+      message:
+        "/o\\ Runtime error! Usually this indicates that some required " +
+        "parameters are missing or are misconfigured.",
       stack: error.stack
     });
 
