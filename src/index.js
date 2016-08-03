@@ -15,12 +15,21 @@ const rawContext = loadContext();
 const context = decorateContext(rawContext);
 const profile = profiles[context.profile];
 const hasValidContext = profile && typeof context.subject === 'function';
+const onError = function(error) {
+  errorMessages.push(error);
+  renderErrors();
+};
 
 if (module.hot) {
   module.hot.accept();
+  module.hot.dispose(function() {
+    guard(function() { profile.stop(context); });
+  });
+
   module.hot.accept([ './profiles/react', './profiles/react-router' ], function() {
     if (hasValidContext) {
-      guard(function() { startProfile(); });
+      guard(function() { profile.stop(context); });
+      guard(function() { profile.start(context, onError); });
     }
   });
 }
@@ -43,18 +52,9 @@ boot(function() {
   renderController();
 
   if (hasValidContext) {
-    guard(function() {
-      startProfile();
-    });
+    guard(function() { profile.start(context, onError); });
   }
 });
-
-function startProfile() {
-  profile(context, function(error) {
-    errorMessages.push(error);
-    renderErrors();
-  });
-}
 
 function renderErrors() {
   ReactDOM.render(<Errors errorMessages={errorMessages} />, document.querySelector('#mirage-errors'));

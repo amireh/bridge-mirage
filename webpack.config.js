@@ -31,6 +31,9 @@ const config = {
       path.join(GET_SMART, 'jsapp/shimmed_modules'),
       path.join(GET_SMART, 'jsapp/shared'),
       path.join(GET_SMART, 'packages'),
+
+      // This is needed for imports within the context file
+      path.join(GET_SMART),
     ],
 
     fallback: path.resolve(__dirname),
@@ -104,6 +107,7 @@ const config = {
         loader: 'style!css!sass',
         include: [
           path.resolve(__dirname, 'src'),
+          path.resolve(__dirname, 'runner'),
           path.resolve(GET_SMART, 'app/assets/stylesheets'),
         ]
       }

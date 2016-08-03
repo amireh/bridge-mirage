@@ -1,0 +1,160 @@
+// TODO: stop duplicating all this here, instead make get_smart move this stuff
+// to an entry file that we can both share
+@charset "utf-8";
+
+@import 'vendor/normalize';
+@import 'vendor/pure';
+@import 'vendor/bourbon/bourbon';
+@import 'vendor/ic/modal';
+@import 'vendor/jquery.qtip';
+@import 'vendor/react-toggle';
+@import 'vendor/mediaelementplayer';
+@import '../../../node_modules/draft-js/dist/Draft';
+
+@import 'ext/jquery.qtip';
+@import 'ext/mediaelementplayer';
+
+$font-stack: 'Avenir-Webfont', 'Avenir', 'Droid Sans', 'DroidSansRegular', Corbel, Tahoma, Geneva, sans-serif;
+
+$max-page-width: 46.875em;
+
+// map generated from json file, so we can share w/ js land
+@import 'shared/variables';
+@function json-var($var) {
+  @return map-get($variables, $var);
+}
+
+@import 'shared/_webfonts';
+@import 'shared/_breakpoints';
+@import 'shared/_spacing';
+@import 'shared/_color';
+@import 'shared/_overrides';
+@import 'shared/_typography';
+@import 'shared/_getsmart-font';
+@import 'shared/_icons';
+@import 'shared/_buttons';
+@import 'shared/_borders';
+@import 'shared/_layout';
+@import 'shared/_lists';
+@import 'shared/_forms';
+@import 'shared/_slides';
+@import 'shared/_z-index';
+@import 'shared/_sidebar_variables';
+
+// ui components
+@import 'components/avatar_base';
+@import 'components/ui/rounded_icon';
+
+// needs to go here—some of the vars are used in other components
+@import 'components/icons';
+@import 'components/sidebar';
+
+@import 'components/slide_editor';
+@import 'components/media_uploader';
+@import 'components/file_input';
+@import 'components/tinymce_modal';
+
+* {
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  height: 100%;
+  padding: 0;
+  width: 100%;
+}
+
+.screenreader-only {
+  border: 0 !important;
+  clip: rect(1px, 1px, 1px, 1px);
+  height: 1px !important;
+  margin: -1px !important;
+  overflow: hidden;
+  padding: 0 !important;
+  position: absolute !important;
+  width: 1px !important;
+}
+
+.page-head {
+  line-height: 50px;
+}
+
+.brand {
+  letter-spacing: 0.2em;
+}
+
+.table {
+  display: table;
+}
+
+.table-cell {
+  display: table-cell;
+  vertical-align: top;
+
+  &.text-baseline {
+    vertical-align: baseline;
+  }
+
+  &.text-middle {
+    vertical-align: middle;
+  }
+}
+
+.middle {
+  vertical-align: middle;
+}
+
+.content-wrapper {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.constrain-width,
+.constrain-width--padded {
+  max-width: $max-page-width;
+}
+
+.constrain-width--padded {
+  @include space(padding, s, right left);
+}
+
+.pure-u-1,
+.page-head [class *= "pure-u"] {
+  max-width: 100%;
+}
+
+.no-transition {
+  &, & * {
+    @include transition-property(none);
+  }
+}
+
+%grabbable,
+.grabbable {
+  cursor: move;
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+}
+
+%grabbing,
+.grabbing {
+  cursor: move;
+  cursor: -webkit-grabbing;
+  cursor: -moz-grabbing;
+}
+
+%unselectable,
+.unselectable {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+.break-word {
+  word-wrap: break-word;
+}

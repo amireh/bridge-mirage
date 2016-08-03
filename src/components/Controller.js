@@ -72,6 +72,7 @@ const MirageController = React.createClass({
               type="text"
               onChange={this.filterModuleList}
               value={this.state.fileListFilter}
+              autoFocus
             />
           </label>
 

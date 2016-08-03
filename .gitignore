@@ -6,6 +6,7 @@
 !/tmp/.gitkeep
 /runner/*
 !/runner/.gitkeep
+!/runner/index.scss
 !/runner/seeds
 /runner/seeds/*
 !/runner/seeds/.gitkeep
