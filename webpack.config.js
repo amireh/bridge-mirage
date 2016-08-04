@@ -2,6 +2,7 @@
 
 const path = require('path');
 const fs = require('fs');
+const glob = require('glob');
 const webpack = require('webpack');
 const jsonToSass = require('json-sass/lib/jsToSassString');
 const BABEL_LOADER = 'babel?babelrc=false&presets[]=es2015&presets[]=react';
@@ -77,7 +78,7 @@ module.exports = function(mirageSettings) {
           exclude: [
             path.resolve(GET_SMART, 'jsapp/vendor'),
             path.resolve(GET_SMART, 'jsapp/shared/components'),
-            path.resolve(GET_SMART, 'jsapp/screens'),
+            path.resolve(GET_SMART, 'jsapp/screens')
           ]
         },
 
@@ -87,10 +88,16 @@ module.exports = function(mirageSettings) {
           loaders: [ 'react-hot', BABEL_LOADER ],
           include: [
             path.resolve(__dirname, 'src'),
-            path.resolve(GET_SMART, 'packages'),
+          ].concat(
+            // We can't just include "packages/" since it will also parse
+            // any node_modules/ beneath it and other junk directories. Since
+            // all packages are expected to place their sources under src/ we'll
+            // just stick to the whitelist.
+            glob.sync(path.resolve(GET_SMART, 'packages/*/src'))
+          ).concat([
             path.resolve(GET_SMART, 'jsapp/shared/components'),
             path.resolve(GET_SMART, 'jsapp/screens'),
-          ]
+          ]),
         },
 
         {

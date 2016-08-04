@@ -25,6 +25,7 @@ const compiler = webpack(loadAndMonkeyPatchWebpackConfig({
 
 // Forward all /api requests to Bridge Rails:
 app.use('/api', proxy(url.parse(`${bridgeHost}/api`)));
+app.use('/auth', proxy(url.parse(`${bridgeHost}/auth`)));
 
 // We'll need body parsing for the activation API, see server/api.js
 app.use(bodyParser.json());
@@ -141,6 +142,7 @@ function loadAndMonkeyPatchWebpackConfig(settings) {
   config.output.publicPath = '/build/';
   config.plugins = (config.plugins || []).concat([
     new webpack.DefinePlugin({
+      // 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
       'process.env.BRIDGE_API_TOKEN': JSON.stringify(apiToken)
     }),
     new webpack.optimize.OccurenceOrderPlugin(),

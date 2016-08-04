@@ -2,6 +2,14 @@
 
 A "lite" Bridge client for faster front-end iterations.
 
+## Installation
+
+Clone this repository into some directory beneath get_smart like
+`packages/mirage` then run `npm install` and make sure you do a
+`grunt test:copyfeatures` sometime.
+
+**YOU NEED NODE v5.0+ FOR THIS**
+
 ## Usage
 
 ### Basic Usage (UI-based)
